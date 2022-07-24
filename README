@@ -1,0 +1,10 @@
+
+
+# django-admin startproject event
+# cd event
+# python manage.py runserver (quite: ctrl + c )
+# python manage.py startapp shifts
+# python manage.py migrate
+# python manage.py createsuperuser
+# python manage.py makemigrations
+# 
