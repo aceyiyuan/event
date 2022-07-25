@@ -1,10 +1,21 @@
+import uuid
 from django.db import models
+from django.utils import timezone
 from django.utils.timezone import now
+from django.dispatch import receiver  
 
+from django.db.models.signals import (
+
+	pre_save,
+	post_save
+
+	)
 # Create your models here.
 
 class Venue (models.Model):
+
 	#https://stackoverflow.com/questions/18676156/how-to-properly-use-the-choices-field-option-in-django
+	
 
 	class Types(models.TextChoices):
 		LPN='LPN',
@@ -16,14 +27,41 @@ class Venue (models.Model):
         default=Types.RN
     )
 
-	created_at = models.DateTimeField(default=now, editable=True,null=True, blank=True)  
-	updated_at = models.DateTimeField(default=None, editable=True,null=True, blank=True)
-	place_text=models.CharField(max_length=200)
+	created = models.DateTimeField(default=now, editable=True,null=True, blank=True) 
+	updated = models.DateTimeField(default=None, editable=True,null=True, blank=True)
 
-	
 	date = models.DateField ('Date')
 	start_time = models.DateTimeField ('start time')
 	finish_time= models.DateTimeField ('finish time')
 	details= models.CharField (max_length=500)
+	place_text=models.CharField(max_length=200)
+
+	def __str__(self):
+		return self.place_text
+	
+
+@receiver(pre_save, sender=Venue)
+def venue_pre_save(sender, instance, *args, **kwargs):
+	
+	#instance.updated =None
+	instance.updated=timezone.now()
+
+@receiver(post_save, sender=Venue)
+def venue_post_save(sender, instance,created, *args, **kwargs):
+	
+	if created:
+	
+		instance.updated=timezone.now()
+		instance.save()
+	
 
 
+
+
+	
+
+		
+
+
+
+	

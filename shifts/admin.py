@@ -4,6 +4,6 @@ from django.contrib import admin
 from .models import Venue
 
 class VenueAdmin(admin.ModelAdmin):
-	fields=['place_text','type','date','start_time','finish_time','details','created_at','updated_at']
+	list_display=('place_text','type','date','start_time','finish_time','details','created','updated')
 
 admin.site.register (Venue, VenueAdmin)
