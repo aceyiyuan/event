@@ -3,6 +3,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.timezone import now
 from django.dispatch import receiver  
+from django.contrib.auth.models import AbstractUser,Group
+
 
 from django.db.models.signals import (
 
@@ -12,7 +14,14 @@ from django.db.models.signals import (
 	)
 # Create your models here.
 
-class Venue (models.Model):
+
+class User(AbstractUser):
+	
+	is_employee = models.BooleanField(default=False)
+	is_employer= models.BooleanField(default=False)
+	is_superuser= models.BooleanField(default=False)
+	
+class Shift(models.Model):
 
 	#https://stackoverflow.com/questions/18676156/how-to-properly-use-the-choices-field-option-in-django
 	
@@ -29,7 +38,6 @@ class Venue (models.Model):
 
 	created = models.DateTimeField(default=now, editable=True,null=True, blank=True) 
 	updated = models.DateTimeField(default=None, editable=True,null=True, blank=True)
-
 	date = models.DateField ('Date')
 	start_time = models.DateTimeField ('start time')
 	finish_time= models.DateTimeField ('finish time')
@@ -40,28 +48,25 @@ class Venue (models.Model):
 		return self.place_text
 	
 
-@receiver(pre_save, sender=Venue)
-def venue_pre_save(sender, instance, *args, **kwargs):
+@receiver(pre_save, sender=Shift)
+def shift_pre_save(sender, instance, *args, **kwargs):
 	
 	#instance.updated =None
 	instance.updated=timezone.now()
 
-@receiver(post_save, sender=Venue)
-def venue_post_save(sender, instance,created, *args, **kwargs):
+@receiver(post_save, sender=Shift)
+def shift_post_save(sender, instance,created, *args, **kwargs):
 	
 	if created:
 	
 		instance.updated=timezone.now()
 		instance.save()
-	
 
 
 
-
-	
-
-		
-
+class Employee(models.Model):
+	id = models.OneToOneField(User,on_delete=models.CASCADE, primary_key=True,unique=True)
+	shift_id= models.ForeignKey(Shift, null=True, blank=True,on_delete=models.CASCADE)
 
 
-	
+
