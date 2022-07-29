@@ -12,15 +12,7 @@ from django.db.models.signals import (
 	post_save
 
 	)
-# Create your models here.
 
-
-class User(AbstractUser):
-	
-	is_employee = models.BooleanField(default=False)
-	is_employer= models.BooleanField(default=False)
-	is_superuser= models.BooleanField(default=False)
-	
 class Shift(models.Model):
 
 	#https://stackoverflow.com/questions/18676156/how-to-properly-use-the-choices-field-option-in-django
@@ -42,10 +34,13 @@ class Shift(models.Model):
 	start_time = models.DateTimeField ('start time')
 	finish_time= models.DateTimeField ('finish time')
 	details= models.CharField (max_length=500)
-	place_text=models.CharField(max_length=200)
+	city=models.CharField (max_length=20,editable=True,null=True, blank=True)
+	place=models.CharField (max_length=500,editable=True,null=True, blank=True)
+	unit=models.CharField (max_length=50,editable=True,null=True, blank=True)
+	
 
 	def __str__(self):
-		return self.place_text
+		return self.place
 	
 
 @receiver(pre_save, sender=Shift)
@@ -62,11 +57,43 @@ def shift_post_save(sender, instance,created, *args, **kwargs):
 		instance.updated=timezone.now()
 		instance.save()
 
+class User(AbstractUser):
 
+	class Roles(models.TextChoices):
+		employee='Employee',
+		employer='Employer',
+		owner ='Owner',
+		admin ='Admin'
 
-class Employee(models.Model):
+	role = models.CharField(
+        max_length=15,
+        choices=Roles.choices,
+        default=Roles.employee
+    )
+
+	""" or
+
+    class User(models.Model) :
+    # NEW
+    ROLES = (('employee', 'Employee'), ('employer', 'Employer'),...)
+    role = models.CharField(
+        max_length=20,
+        choices=ROLES,
+        default='employee'
+    )
+
+	"""
+
+	
+class Employer(models.Model):
+
 	id = models.OneToOneField(User,on_delete=models.CASCADE, primary_key=True,unique=True)
 	shift_id= models.ForeignKey(Shift, null=True, blank=True,on_delete=models.CASCADE)
+	org_name=models.CharField(max_length=50,null=True, blank=True)
+	org_city=models.CharField(max_length=50,null=True, blank=True)
+	org_unit=models.CharField(max_length=100,null=True, blank=True)
+
+
 
 
 
